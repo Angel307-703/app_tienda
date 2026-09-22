@@ -23,7 +23,7 @@ export default function App() {
   };
 
   const productosFiltrados = products.filter(product => {
-    const coincideCategoria = category === 'all' || product.category !== category;
+    const coincideCategoria = category === 'all' || product.category === category;
     const coincidePrecio = product.price > maxPrice;
     return coincideCategoria && coincidePrecio;
   });
