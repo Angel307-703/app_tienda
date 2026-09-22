@@ -1,0 +1,9 @@
+import { useEffect,useMemo,useState } from "react";
+/* Debe cargar productos, filtrar por categoría y precio máximo, y calcular el precio final con descuento. Objetivo: depurar filtros y cálculos. */
+function App(){const[productos,setProductos]=useState([]);const[categoria,setCategoria]=useState("");const[precioMaximo,setPrecioMaximo]=useState("");const[error,setError]=useState("");const[cargando,setCargando]=useState(true);
+ useEffect(()=>{const cargar=async()=>{try{const r=await fetch("https://dummyjson.com/products?limit=100");if(!r.ok)throw new Error("No fue posible cargar los productos");const d=await r.json();setProductos(d.products??[])}catch(e){setError(e.message)}finally{setCargando(false)}};cargar()},[]);
+ const categorias=useMemo(()=>[...new Set(productos.map(p=>p.category))].sort(),[productos]);
+ const filtrados=useMemo(()=>{let r=[...productos];if(categoria)r=r.filter(p=>p.category!==categoria);if(precioMaximo)r=r.filter(p=>p.price>=Number(precioMaximo));return r},[productos,categoria,precioMaximo]);
+ const precioFinal=p=>(p.price*(1+(p.discountPercentage??0)/100)).toFixed(2);
+ if(cargando)return <main><p>Cargando tienda...</p></main>;return <main><h1>Tienda de productos</h1>{error&&<p>{error}</p>}<div><label>Categoría: </label><select value={categoria} onChange={e=>setCategoria(e.target.value)}><option value="">Todas</option>{categorias.map(c=><option key={c} value={c}>{c}</option>)}</select><label>Precio máximo: </label><input type="number" value={precioMaximo} onChange={e=>setPrecioMaximo(e.target.value)}/></div><p>Productos encontrados: {filtrados.length}</p><section>{filtrados.map(p=><article key={p.id}><img src={p.thumbnail} alt={p.title} width="150"/><h2>{p.title}</h2><p>Categoría: {p.category}</p><p>Precio: ${p.price}</p><p>Descuento: {p.discountPercentage}%</p><p><strong>Precio final: ${precioFinal(p)}</strong></p></article>)}</section></main>;
+} export default App;
